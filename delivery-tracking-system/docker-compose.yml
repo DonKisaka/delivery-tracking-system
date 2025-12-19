@@ -1,0 +1,38 @@
+services:
+  postgres-db:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: delivery_system_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=deliverysystem
+      - POSTGRES_PASSWORD=deliverysystempassword
+      - POSTGRES_DB=delivery_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - driver-system-network
+
+
+  delivery_system_app:
+    build: .
+    container_name: delivery_system_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/delivery_system
+      SPRING_DATASOURCE_USERNAME: deliverysystem
+      SPRING_DATASOURCE_PASSWORD: deliverysystempassword
+    depends_on:
+      - postgres-db
+    networks:
+      - driver-system-network
+
+volumes:
+  postgres-data:
+
+networks:
+  driver-system-network:
+    driver: bridge
